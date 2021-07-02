@@ -1,15 +1,41 @@
-1)- Install Openssl in desktop (https://slproweb.com/products/Win32OpenSSL.html)
+Install Openssl in desktop (https://slproweb.com/products/Win32OpenSSL.html)
 
-2)- Add bin path into enviroment variable.
+# CA key and certificate
+openssl genrsa -des3 -out ca.key 4096
+openssl req -new -x509 -days 365 -key ca.key -out ca.crt
 
-3)- openssl req -x509 -days 365 -newkey rsa:2048 -keyout my-key.pem -out my-cert.pem
+# server key
+openssl genrsa -des3 -out server.key 1024
 
-	* Enter password
-	* Verify Password
-	* Enter all the detail as per they say
+# CSR (certificate sign request) to obtain certificate
+openssl req -new -key server.key -out server.csr
 
-4)- PKCS file command openssl pkcs12 -export -in my-cert.pem -inkey my-key.pem -out akash-test-cert.pfx
+# sign server CSR with CA certificate and key
+openssl x509 -req -days 365 -in server.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out server.crt
 
-5)- Enter password that you have used before.
+# client key
+openssl genrsa -des3 -out client.key 1024
 
-6)- Create new Password.
+# CSR to obtain certificate
+openssl req -new -key client.key -out client.csr
+
+# sign client CSR with CA certificate and key
+openssl x509 -req -days 365 -in client.csr -CA ca.crt -CAkey ca.key -set_serial 01 -out client.crt
+
+# server key out to temp.key
+openssl rsa -in server.key -out temp.key
+
+# remove server.key
+rm server.key (Use "del" in CMD instead of "rm")
+
+# make temp.key as server key
+mv temp.key server.key (Use "move" in CMD instead of "mv")
+
+# client key out to temp.key
+openssl rsa -in client.key -out temp.key
+
+# remove client.key
+rm client.key (Use "del" in CMD instead of "rm")
+
+# make temp.key as client key
+mv temp.key client.key (Use "move" in CMD instead of "mv")
